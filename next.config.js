@@ -1,8 +1,9 @@
-import type { NextConfig } from "next";
+const withPlugins = require('next-compose-plugins');
 
-const nextConfig: NextConfig = {
+const nextConfig = {
   /* config options here */
   output: "standalone",
 };
 
-export default nextConfig;
+module.exports = withPlugins([], nextConfig);
+
