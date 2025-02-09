@@ -96,50 +96,57 @@ export default function POS() {
   };
 
   return (
-    <>
-    <div className="p-4 flex flex-row flex-wrap">
-      <div className="flex flex-col basis-1/2">
+    <div className="container flex flex-wrap p-6">
+      {/* 左側の入力・追加パネル */}
+      <div className="left-panel flex flex-col basis-1/2 p-6">
         <input
           type="text"
           value={code}
           onChange={(e) => setCode(e.target.value)}
           placeholder="バーコードを入力"
-          className="outline outline-offset-2 outline-1 m-6 tabular-nums text-black"
+          className="input-box m-3"
         />
         <button
           onClick={fetchProduct}
-          className="m-6 outline outline-offset-2 outline-1"
-        >商品コード 読み込み</button>
+          className="button m-3"
+        >
+          商品コード 読み込み
+        </button>
 
         {product && (
-          <div className="m-6 outline outline-offset-2 outline-1">
+          <div className="product-info m-3 p-4">
             <p>商品名: {product.name}</p>
-            <p>価格: ¥{product.price}</p>
+            <p>価格: {product.price}円</p>
             <button 
-            onClick={() => addToCart(product)}
-            className="m-6 outline outline-offset-2 outline-1"
-            >追加</button>
+              onClick={() => addToCart(product)}
+              className="button m-3"
+            >
+              追加
+            </button>
           </div>
         )}
       </div>
-      <div className="flex flex-col basis-1/2">
-        <h3 className="m-6 text-center">購入リスト</h3>
-          <ul className="m-6 p-6 outline outline-offset-2 outline-1">
+
+      {/* 右側の購入リスト */}
+      <div className="right-panel flex flex-col basis-1/2 p-6">
+        <div className="purchase-list m-3 p-4">
+          <h3 className="text-center">購入リスト</h3>
+          <ul className="p-3">
             {cart.map((item, index) => (
               <li key={index}>
                 {item.name} ×１ {item.price}円
               </li>
             ))}
           </ul>
+        </div>
 
-          <button
-            onClick={purchase}
-            className="m-6 outline outline-offset-2 outline-1"
-          >
-            購入
-          </button>
+        <button
+          onClick={purchase}
+          className="purchase-button m-3"
+        >
+          購入
+        </button>
       </div>
     </div>
-    </>
   );
 }
