@@ -114,9 +114,9 @@ export default function POS() {
         </button>
 
         {product && (
-          <div className="product-info m-3 p-4">
-            <p>商品名: {product.name}</p>
-            <p>価格: {product.price}円</p>
+          <div className="p-4">
+            <p className="input-box m-3 p-4">商品名: {product.name}</p>
+            <p className="input-box m-3 p-4">価格: {product.price}円</p>
             <button 
               onClick={() => addToCart(product)}
               className="button m-3"
