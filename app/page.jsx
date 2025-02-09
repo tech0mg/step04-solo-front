@@ -12,7 +12,7 @@ export default function POS() {
   // 商品検索
   const fetchProduct = async () => {
     try {
-        const res = await fetch(`${apiUrl}/api/product?code=${code}`);
+        const res = await fetch(`https://tech0-gen8-step4-pos-app-16.azurewebsites.net/api/product?code=${code}`);
         if (!res.ok) {
             throw new Error(`API error: ${res.status} ${res.statusText}`);
         }
