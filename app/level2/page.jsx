@@ -1,38 +1,50 @@
 // Level2課題
 'use client';
 import { useState, useRef, useEffect } from "react";
-import { Html5QrcodeScanner } from "html5-qrcode";
+import Html5QrcodePlugin from './Html5QrcodePlugin';
 
 export default function POS() {
   const [code, setCode] = useState("");
   const [product, setProduct] = useState({});
   const [cart, setCart] = useState([]);
-  const scannerRef = useRef(null);
-  const readerContainerRef = useRef(null); // `reader` の div を参照
+  const [barcode, setBarcode] = useState(""); // スキャンしたバーコード
+  const [scannerActive, setScannerActive] = useState(false); // スキャナーの表示状態
+
 
   // 環境変数の読み取り
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-  // スキャン機能による商品検索
-  const startScanner = () => {
-    if (!scannerRef.current) {
-        scannerRef.current = new Html5QrcodeScanner("reader", {
-            fps: 10,
-            qrbox: { width: 250, height: 250 },
-        });
-
-        scannerRef.current.render(
-            (decodedText) => {
-                setCode(decodedText); // スキャンしたコードを保存
-                fetchProduct(decodedText); // 商品検索実行
-                scannerRef.current.clear(); // スキャナー停止
-            },
-            (error) => console.warn("Scanning error:", error)
-        );
+  // 商品検索関数（スキャンしたバーコードを使う）
+  const fetchProduct = async (code) => {
+    try {
+        const res = await fetch(`${apiUrl}/api/product?code=${code}`);
+        if (!res.ok) {
+            throw new Error(`APIエラー: ${res.status} ${res.statusText}`);
+        }
+        const data = await res.json();
+        if (data.error) {
+            alert(data.error);
+        } else {
+            setProduct(data);
+        }
+    } catch (error) {
+        console.error("商品情報の取得に失敗:", error);
+        alert("商品情報の取得に失敗しました");
     }
-};
+  };
 
-  // 商品検索
+  // QRコードの読み取り結果を処理（スキャン後に商品検索を実行）
+  const onNewScanResult = (decodedText) => {
+    if (/^\d{13}$/.test(decodedText)) { // 13桁の数字かチェック
+        setBarcode(decodedText);
+        setScannerActive(false); // スキャン後にスキャナーを閉じる
+        fetchProduct(decodedText); // 取得したコードで商品検索を実行
+    } else {
+        alert("無効なバーコードです");
+    }
+  };
+
+  /* 商品検索
   const fetchProduct = async () => {
     try {
         const res = await fetch(`${apiUrl}/api/product?code=${code}`);
@@ -50,6 +62,7 @@ export default function POS() {
         alert("商品情報の取得に失敗しました");
     }
   };
+  */
 
   // カートに商品を追加
   const addToCart = (product) => {
@@ -123,32 +136,35 @@ export default function POS() {
       {/* 左側の入力・追加パネル */}
       <div className="left-panel flex flex-col basis-1/2 p-6">
         <button
-          onClick={() => scannerRef.current?.render()}
+          onClick={() => setScannerActive(true)}
           className="button m-3"
-        >
-          スキャン（カメラ）
-        </button>
-        <div id="reader" ref={readerContainerRef}></div>
-        <input
-          type="text"
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          placeholder="バーコードを入力"
-          className="input-box m-3"
-        />
+        >スキャン（カメラ）</button>
 
+        {/* QRコードスキャナー（ボタンを押したときのみ表示） */}
+        {scannerActive && (
+            <Html5QrcodePlugin
+                fps={10}
+                qrbox={250}
+                disableFlip={false}
+                qrCodeSuccessCallback={onNewScanResult} // スキャン成功時の処理
+            />
+        )}
 
-        {product && (
-          <div className="p-4">
-            <p className="input-box m-3 p-4">商品名: {product.name}</p>
-            <p className="input-box m-3 p-4">価格: {product.price}円</p>
-            <button 
-              onClick={() => addToCart(product)}
-              className="button m-3"
-            >
-              追加
-            </button>
-          </div>
+        {product ? (
+            <div className="p-4">
+                <h2>商品情報</h2>
+                <p className="input-box m-3 p-4">商品コード: {product.code}</p>
+                <p className="input-box m-3 p-4">商品名: {product.name}</p>
+                <p className="input-box m-3 p-4">価格: {product.price}円</p>
+                <button 
+                  onClick={() => addToCart(product)}
+                  className="button m-3"
+                >
+                  追加
+                </button>
+            </div>
+        ) : (
+            barcode && <p>商品情報が見つかりませんでした</p>
         )}
       </div>
 
