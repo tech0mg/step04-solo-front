@@ -18,9 +18,9 @@ export default function POS() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   // 商品検索関数（スキャンしたバーコードを使う）
-  const fetchProduct = async (scannedCode) => {
+  const fetchProduct = async (code) => {
     try {
-        const res = await fetch(`${apiUrl}/api/product?code=${scannedCode}`);
+        const res = await fetch(`${apiUrl}/api/product?code=${code}`);
         if (!res.ok) {
             throw new Error(`APIエラー: ${res.status} ${res.statusText}`);
         }
@@ -50,7 +50,7 @@ export default function POS() {
   const handleScan = async (code) => {
     console.log("スキャン結果:", code);
     setScannedCode(code);
-    await fetchProduct(scannedCode);
+    await fetchProduct(code);
   };
 
   /* 商品検索
