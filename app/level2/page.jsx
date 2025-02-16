@@ -11,15 +11,16 @@ export default function POS() {
   const [barcode, setBarcode] = useState(""); // スキャンしたバーコード
   const [scannerActive, setScannerActive] = useState(false); // スキャナーの表示状態
   const [scannedCode, setScannedCode] = useState("");
+  const [isScanning, setIsScanning] = useState(false);
 
 
   // 環境変数の読み取り
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   // 商品検索関数（スキャンしたバーコードを使う）
-  const fetchProduct = async (code) => {
+  const fetchProduct = async (scannedCode) => {
     try {
-        const res = await fetch(`${apiUrl}/api/product?code=${code}`);
+        const res = await fetch(`${apiUrl}/api/product?code=${scannedCode}`);
         if (!res.ok) {
             throw new Error(`APIエラー: ${res.status} ${res.statusText}`);
         }
@@ -46,9 +47,10 @@ export default function POS() {
     }
   };
 
-  const handleScan = (code) => {
+  const handleScan = async (code) => {
     console.log("スキャン結果:", code);
     setScannedCode(code);
+    await fetchProduct(scannedCode);
   };
 
   /* 商品検索
@@ -142,12 +144,13 @@ export default function POS() {
     <div className="container flex flex-wrap p-6">
       {/* 左側の入力・追加パネル */}
       <div className="left-panel flex flex-col basis-1/2 p-6">
+        {/* Html5利用時読み取り機能
         <button
           onClick={() => setScannerActive(true)}
           className="button m-3"
         >スキャン（カメラ）</button>
 
-        {/* QRコードスキャナー（ボタンを押したときのみ表示） */}
+        QRコードスキャナー（ボタンを押したときのみ表示） 
         {scannerActive && (
             <Html5QrcodePlugin
                 fps={10}
@@ -156,10 +159,20 @@ export default function POS() {
                 qrCodeSuccessCallback={onNewScanResult} // スキャン成功時の処理
             />
         )}
+        */}
 
-        <h1>バーコードスキャン（パート２）</h1>
-        <BarcodeScanner onScan={handleScan} />
+        {!isScanning && (
+          <button onClick={() => setIsScanning(true)} className="button m-3">
+            スキャンを開始
+          </button>
+        )}
+        {/* スキャナーを表示 */}
+        <BarcodeScanner onScan={handleScan} isScanning={isScanning} setIsScanning={setIsScanning} />
+
+        {/* スキャン結果表示 */}
         {scannedCode && <p>スキャンされたコード: {scannedCode}</p>}
+
+
 
 
         {/* スキャン後の情報表示 */}
