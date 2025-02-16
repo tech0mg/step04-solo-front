@@ -2,6 +2,7 @@
 'use client';
 import { useState, useRef, useEffect } from "react";
 import Html5QrcodePlugin from './Html5QrcodePlugin';
+import BarcodeScanner from './quagga2';
 
 export default function POS() {
   const [code, setCode] = useState("");
@@ -9,6 +10,7 @@ export default function POS() {
   const [cart, setCart] = useState([]);
   const [barcode, setBarcode] = useState(""); // スキャンしたバーコード
   const [scannerActive, setScannerActive] = useState(false); // スキャナーの表示状態
+  const [scannedCode, setScannedCode] = useState("");
 
 
   // 環境変数の読み取り
@@ -42,6 +44,11 @@ export default function POS() {
     } else {
         alert("無効なバーコードです");
     }
+  };
+
+  const handleScan = (code) => {
+    console.log("スキャン結果:", code);
+    setScannedCode(code);
   };
 
   /* 商品検索
@@ -150,6 +157,12 @@ export default function POS() {
             />
         )}
 
+        <h1>バーコードスキャン（パート２）</h1>
+        <BarcodeScanner onScan={handleScan} />
+        {scannedCode && <p>スキャンされたコード: {scannedCode}</p>}
+
+
+        {/* スキャン後の情報表示 */}
         {product ? (
             <div className="p-4">
                 <h2>商品情報</h2>
